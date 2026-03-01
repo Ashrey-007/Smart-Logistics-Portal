@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django settings
+.env
+db.sqlite3
+db.sqlite3-journal
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# Static files collected
+staticfiles/
+static/img/hero-illustration.png # generated image, let's ignore or commit? We can ignore it if it's large, or commit it. Better to commit it if they want it. Let's not ignore the whole static/img but ignore other caches if any. Let's ignore standard staticfiles.
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

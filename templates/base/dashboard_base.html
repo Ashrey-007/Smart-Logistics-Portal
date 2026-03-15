@@ -1,0 +1,45 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="erp-shell">
+    <aside class="erp-sidebar">
+        <a class="erp-brand" href="{% url 'dashboard' %}">
+            <span class="brand-mark"><i class="bi bi-truck-front"></i></span>
+            <span><strong>SmartLogix</strong><small>Operations ERP</small></span>
+        </a>
+        <div class="sidebar-group">Workspace</div>
+        <a class="side-link" href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i><span>Overview</span></a>
+        {% if user.is_staff %}
+            <a class="side-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-command"></i><span>Control Tower</span></a>
+            <a class="side-link" href="/admin/"><i class="bi bi-shield-check"></i><span>Django Admin</span></a>
+        {% else %}
+            <a class="side-link" href="{% url 'create_booking' %}"><i class="bi bi-plus-square"></i><span>New Booking</span></a>
+            <a class="side-link" href="{% url 'booking_history' %}"><i class="bi bi-clipboard-data"></i><span>Booking History</span></a>
+            <a class="side-link" href="{% url 'track_shipment' %}"><i class="bi bi-geo-alt"></i><span>Track Shipment</span></a>
+            <a class="side-link" href="{% url 'create_complaint' %}"><i class="bi bi-life-preserver"></i><span>Support Cases</span></a>
+        {% endif %}
+        <div class="sidebar-health">
+            <span class="pulse"></span>
+            <div><strong>Network Live</strong><small>All hubs synchronized</small></div>
+        </div>
+    </aside>
+    <section class="erp-main">
+        <header class="erp-topbar">
+            <div>
+                <span class="topbar-label">Asia/Kathmandu</span>
+                <strong>{% if user.is_staff %}Operations Control Tower{% else %}Customer Workspace{% endif %}</strong>
+            </div>
+            <div class="topbar-actions">
+                <span class="user-chip"><i class="bi bi-person-circle"></i>{{ user.get_full_name|default:user.username }}</span>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="icon-btn" type="submit" title="Logout"><i class="bi bi-box-arrow-right"></i></button>
+                </form>
+            </div>
+        </header>
+        <div class="erp-content">
+            {% block dashboard_content %}{% endblock %}
+        </div>
+    </section>
+</div>
+{% endblock %}

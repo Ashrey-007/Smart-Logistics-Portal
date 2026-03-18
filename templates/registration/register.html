@@ -1,0 +1,28 @@
+{% extends "base/base.html" %}
+{% block title %}Register | Smart Logistics ERP{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+    <div class="auth-panel auth-wide">
+        <span class="eyebrow">Customer onboarding</span>
+        <h1>Create Account</h1>
+        <p class="text-muted small mb-3">Register as a freight customer to access booking, tracking, and support services.</p>
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold small text-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<small class="form-text text-muted d-block" style="font-size: 0.7rem;">{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                </div>
+            {% endfor %}
+            <div class="col-12 mt-4">
+                <button class="btn btn-primary w-100 fw-bold btn-lg" type="submit"><i class="bi bi-person-plus me-2"></i>Create Freight Account</button>
+            </div>
+        </form>
+        <div class="text-center mt-3">
+            <small class="text-muted">Already have an account? <a href="{% url 'login' %}">Login here</a></small>
+        </div>
+    </div>
+</section>
+{% endblock %}

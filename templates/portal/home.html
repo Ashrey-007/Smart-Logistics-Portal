@@ -1,0 +1,231 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}Home | Smart Logistics ERP{% endblock %}
+{% block content %}
+<section class="hero-erp">
+    <div class="container-fluid px-lg-4">
+        <div class="hero-grid">
+            <div>
+                <span class="eyebrow">Enterprise logistics control tower</span>
+                <h1>Smart Logistics ERP Control Portal</h1>
+                <p>Book shipments, calculate precise volumetric freight costs, track chronological transit logs, and orchestrate customs operations in one centralized portal.</p>
+                
+                <!-- Quick Tracking Widget -->
+                <div class="p-3 border rounded mb-4 bg-white bg-opacity-10 backdrop-blur" style="max-width: 500px; border-color: rgba(255,255,255,0.15) !important;">
+                    <span class="text-white small d-block mb-2 fw-semibold"><i class="bi bi-search me-1 text-cyan"></i>Quick Shipment Tracking</span>
+                    <form method="get" action="{% url 'track_shipment' %}" class="d-flex gap-2">
+                        <input type="text" name="tracking_id" class="form-control form-control-dark" placeholder="Enter tracking ID (e.g. SL-8F24A0C921)" required style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #fff;">
+                        <button type="submit" class="btn btn-cyan px-4 fw-bold">Track</button>
+                    </form>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-primary btn-lg px-4" href="{% url 'create_booking' %}"><i class="bi bi-calendar2-plus me-2"></i>Book Shipment</a>
+                    <a class="btn btn-light btn-lg px-4" href="{% url 'register' %}">Register Account</a>
+                </div>
+            </div>
+            
+            <!-- Custom Image Graphic Container -->
+            <div class="ops-board p-0 border-0 overflow-hidden shadow-lg position-relative" style="border-radius: 12px;">
+                <img src="{% static 'img/hero-illustration.png' %}" alt="Smart Logistics ERP Dashboard Graphic" class="img-fluid w-100" style="object-fit: cover; max-height: 480px;">
+                <div class="position-absolute bottom-0 start-0 end-0 p-3 bg-dark bg-opacity-70 text-white backdrop-blur border-top border-secondary border-opacity-30">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><strong>Global Route Control</strong><br><small class="text-cyan">45+ operational terminal yards</small></div>
+                        <span class="badge bg-success rounded-pill px-3 py-2"><span class="pulse d-inline-block me-1"></span>LIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Commercial KPI Stats Banner -->
+<section class="border-bottom bg-white py-4 shadow-sm">
+    <div class="container-fluid px-lg-4">
+        <div class="row text-center g-3">
+            <div class="col-md-3 col-6">
+                <h3 class="fw-extrabold text-primary mb-0">1.2M+</h3>
+                <small class="text-muted fw-bold">Shipments Delivered</small>
+            </div>
+            <div class="col-md-3 col-6">
+                <h3 class="fw-extrabold text-primary mb-0">99.8%</h3>
+                <small class="text-muted fw-bold">On-Time Accuracy</small>
+            </div>
+            <div class="col-md-3 col-6">
+                <h3 class="fw-extrabold text-primary mb-0">&lt; 15s</h3>
+                <small class="text-muted fw-bold">Route Optimization Latency</small>
+            </div>
+            <div class="col-md-3 col-6">
+                <h3 class="fw-extrabold text-primary mb-0">24/7</h3>
+                <small class="text-muted fw-bold">Control Tower Heartbeat</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Features & Cost Estimator Grid -->
+<section class="container-fluid px-lg-4 py-5">
+    <div class="row g-4">
+        <!-- Explanations Column -->
+        <div class="col-lg-7">
+            <div class="section-head mb-4">
+                <span class="eyebrow">Enterprise Modules</span>
+                <h2 class="fw-bold">Designed for Heavy-Duty Freight Workflows</h2>
+                <p class="text-muted">SmartLogix ERP integrates critical supply chain coordinates into a single dashboard. Perfect for regional cargo logistics, transport networks, and border customs workflows.</p>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-4 border rounded bg-white h-100 shadow-sm">
+                        <i class="bi bi-box-seam text-primary display-6 mb-3 d-block"></i>
+                        <h4 class="fw-bold">Dynamic Cargo Desking</h4>
+                        <p class="text-muted small">Customers specify exact package dimensions, actual weight, declared values, and service tiers. The backend automatically calculates precise, legally-audited volumetric quotes.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 border rounded bg-white h-100 shadow-sm">
+                        <i class="bi bi-signpost-split text-primary display-6 mb-3 d-block"></i>
+                        <h4 class="fw-bold">Chronological Timeline Track</h4>
+                        <p class="text-muted small">Moves beyond simple progress bars. Chronologically tracks linehaul dispatch, border customs releases, and warehouse holding logs with deep historical event history.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 border rounded bg-white h-100 shadow-sm">
+                        <i class="bi bi-printer text-primary display-6 mb-3 d-block"></i>
+                        <h4 class="fw-bold">Printable Billing Statements</h4>
+                        <p class="text-muted small">Generates print-optimized PDF-style commercial invoices complete with billing line-item breakdowns, cargo specifications, and QR code placeholders for terminal scans.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-4 border rounded bg-white h-100 shadow-sm">
+                        <i class="bi bi-headset text-primary display-6 mb-3 d-block"></i>
+                        <h4 class="fw-bold">Support Ticket Dialogue</h4>
+                        <p class="text-muted small">Supports conversational issue desking. Dialogue-style threads allow customers to negotiate delay issues or damaged claims directly with staff agents.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Quote Calculator Column -->
+        <div class="col-lg-5">
+            <div class="calculator-card shadow-lg sticky-top" style="top: 90px; z-index: 10;">
+                <h4 class="fw-bold mb-3"><i class="bi bi-calculator text-primary me-2"></i>Live Freight Cost Estimator</h4>
+                <p class="text-muted small">Input cargo specs below to calculate a live estimated freight quote instantly.</p>
+                
+                <form id="calcForm" class="row g-2">
+                    <div class="col-md-6 col-12">
+                        <label class="form-label small fw-semibold text-muted mb-1">Cargo Type</label>
+                        <select id="calcType" class="form-select form-select-sm">
+                            <option value="General">General Goods</option>
+                            <option value="Electronics">Electronics (Fragile)</option>
+                            <option value="Perishable">Perishable Items</option>
+                            <option value="Heavy">Heavy Machinery</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label class="form-label small fw-semibold text-muted mb-1">Service Tier</label>
+                        <select id="calcService" class="form-select form-select-sm">
+                            <option value="Standard">Standard (Economy)</option>
+                            <option value="Express">Express Road (Fast)</option>
+                            <option value="Priority">Priority Air (Next-Day)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold text-muted mb-1">Actual Weight (kg)</label>
+                        <input type="number" id="calcWeight" class="form-control form-control-sm" value="10" min="0.1" step="0.1">
+                    </div>
+                    
+                    <div class="col-12">
+                        <span class="form-label small d-block fw-semibold text-muted mb-1">Package Dimensions (cm)</span>
+                        <div class="d-flex gap-2">
+                            <input type="number" id="calcLength" class="form-control form-control-sm" placeholder="L" value="30" min="1">
+                            <input type="number" id="calcWidth" class="form-control form-control-sm" placeholder="W" value="20" min="1">
+                            <input type="number" id="calcHeight" class="form-control form-control-sm" placeholder="H" value="20" min="1">
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold text-muted mb-1">Declared Cargo Value (NPR)</label>
+                        <input type="number" id="calcValue" class="form-control form-control-sm" value="10000" min="0">
+                    </div>
+                </form>
+                
+                <div class="mt-4 p-3 border rounded bg-white">
+                    <div class="calc-metric"><span>Dimensional Weight</span><strong id="resDim">-</strong></div>
+                    <div class="calc-metric"><span>Chargeable Weight</span><strong id="resCharge">-</strong></div>
+                    <div class="calc-metric"><span>Base Freight Cost</span><strong id="resBase">-</strong></div>
+                    <div class="calc-metric"><span>Service Surcharge</span><strong id="resService">-</strong></div>
+                    <div class="calc-metric"><span>Value Surcharge (1.5%)</span><strong id="resValue">-</strong></div>
+                    
+                    <div class="calc-total">
+                        <span>Estimated Quote:</span>
+                        <span id="resTotal">NPR 0.00</span>
+                    </div>
+                </div>
+                <small class="text-muted d-block text-center mt-2" style="font-size: 0.72rem;">*Quotes are estimates only, subject to final hub scan validation.</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Live Cost Calculator Script -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const calcWeight = document.getElementById("calcWeight");
+    const calcLength = document.getElementById("calcLength");
+    const calcWidth = document.getElementById("calcWidth");
+    const calcHeight = document.getElementById("calcHeight");
+    const calcValue = document.getElementById("calcValue");
+    const calcService = document.getElementById("calcService");
+    
+    const resDim = document.getElementById("resDim");
+    const resCharge = document.getElementById("resCharge");
+    const resBase = document.getElementById("resBase");
+    const resService = document.getElementById("resService");
+    const resValue = document.getElementById("resValue");
+    const resTotal = document.getElementById("resTotal");
+
+    function calculateFreight() {
+        const weight = parseFloat(calcWeight.value) || 0;
+        const length = parseFloat(calcLength.value) || 0;
+        const width = parseFloat(calcWidth.value) || 0;
+        const height = parseFloat(calcHeight.value) || 0;
+        const value = parseFloat(calcValue.value) || 0;
+        const service = calcService.value;
+
+        // Volumetric Weight calculation: (L * W * H) / 5000
+        const dimWeight = (length * width * height) / 5000;
+        const chargeableWeight = Math.max(weight, dimWeight);
+
+        // Base rate: NPR 1.50 per kg
+        const baseCost = chargeableWeight * 1.50;
+
+        // Service Multiplier
+        let serviceMultiplier = 1.0;
+        if (service === "Express") serviceMultiplier = 1.5;
+        if (service === "Priority") serviceMultiplier = 2.5;
+
+        const serviceCost = baseCost * (serviceMultiplier - 1.0);
+        const valueSurcharge = value * 0.015;
+        const total = baseCost * serviceMultiplier + valueSurcharge;
+
+        // Render breakdowns
+        resDim.textContent = `${dimWeight.toFixed(2)} kg`;
+        resCharge.textContent = `${chargeableWeight.toFixed(2)} kg`;
+        resBase.textContent = `NPR ${baseCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        resService.textContent = `NPR ${serviceCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        resValue.textContent = `NPR ${valueSurcharge.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        resTotal.textContent = `NPR ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+
+    // Bind event listeners
+    [calcWeight, calcLength, calcWidth, calcHeight, calcValue, calcService].forEach(el => {
+        el.addEventListener("input", calculateFreight);
+    });
+
+    // Run initial calculation
+    calculateFreight();
+});
+</script>
+{% endblock %}

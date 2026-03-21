@@ -1,0 +1,125 @@
+{% extends "base/dashboard_base.html" %}
+{% block dashboard_content %}
+<div class="section-head">
+    <div><span class="eyebrow">Booking desk</span><h1>New Shipment Request</h1></div>
+</div>
+
+<div class="row g-4">
+    <!-- Booking Form Column -->
+    <div class="col-lg-7">
+        <div class="erp-panel h-100">
+            <div class="panel-title mb-4"><h2>Cargo Details</h2><span>Specify package parameters</span></div>
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="{% if field.name == 'additional_notes' %}col-12{% else %}col-md-6{% endif %}">
+                        <label class="form-label fw-semibold text-dark small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<small class="form-text text-muted d-block" style="font-size: 0.72rem;">{{ field.help_text }}</small>{% endif %}
+                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="col-12 mt-4"><button class="btn btn-primary btn-lg w-100 fw-bold" type="submit"><i class="bi bi-file-earmark-check me-2"></i>Submit Booking Request</button></div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Live Estimator Panel Column -->
+    <div class="col-lg-5">
+        <div class="calculator-card shadow-sm sticky-top" style="top: 90px; z-index: 10;">
+            <h4 class="fw-bold mb-3 text-dark"><i class="bi bi-wallet2 text-primary me-2"></i>Live Billing Calculator</h4>
+            <p class="text-muted small">Real-time shipping quote estimate based on the values typed in the left panel.</p>
+            
+            <div class="p-3 border rounded bg-white">
+                <div class="calc-metric"><span>Cargo Volume</span><strong id="liveVol">-</strong></div>
+                <div class="calc-metric"><span>Volumetric Weight</span><strong id="liveDim">-</strong></div>
+                <div class="calc-metric"><span>Billable Weight</span><strong id="liveCharge">-</strong></div>
+                <hr class="my-2 border-secondary border-opacity-20">
+                <div class="calc-metric"><span>Base Freight Fee</span><strong id="liveBase">-</strong></div>
+                <div class="calc-metric"><span>Service Tier Fee</span><strong id="liveService">-</strong></div>
+                <div class="calc-metric"><span>Declared Value Surcharge</span><strong id="liveVal">-</strong></div>
+                
+                <div class="calc-total">
+                    <span>Estimated Cost:</span>
+                    <span id="liveTotal">NPR 0.00</span>
+                </div>
+            </div>
+            
+            <div class="alert alert-light border border-dashed mt-3 mb-0 text-center" style="font-size: 0.75rem;">
+                <i class="bi bi-shield-lock-fill text-success me-1"></i>Secure operations channel. Freight quotes undergo terminal audit upon shipment receipt.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Calculation Sync Script -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Select standard Django form input IDs
+    const fWeight = document.getElementById("id_weight");
+    const fLength = document.getElementById("id_length");
+    const fWidth = document.getElementById("id_width");
+    const fHeight = document.getElementById("id_height");
+    const fValue = document.getElementById("id_declared_value");
+    const fService = document.getElementById("id_service_level");
+
+    const liveVol = document.getElementById("liveVol");
+    const liveDim = document.getElementById("liveDim");
+    const liveCharge = document.getElementById("liveCharge");
+    const liveBase = document.getElementById("liveBase");
+    const liveService = document.getElementById("liveService");
+    const liveVal = document.getElementById("liveVal");
+    const liveTotal = document.getElementById("liveTotal");
+
+    function calculateLiveFreight() {
+        if (!fWeight || !fLength || !fWidth || !fHeight || !fValue || !fService) return;
+
+        const weight = parseFloat(fWeight.value) || 0;
+        const length = parseFloat(fLength.value) || 0;
+        const width = parseFloat(fWidth.value) || 0;
+        const height = parseFloat(fHeight.value) || 0;
+        const value = parseFloat(fValue.value) || 0;
+        const service = fService.value;
+
+        // Cubic volume in cubic meters: L * W * H / 1,000,000
+        const volume = (length * width * height) / 1000000;
+
+        // Volumetric Weight calculation: (L * W * H) / 5000
+        const dimWeight = (length * width * height) / 5000;
+        const chargeableWeight = Math.max(weight, dimWeight);
+
+        // Base rate: NPR 1.50 per kg
+        const baseCost = chargeableWeight * 1.50;
+
+        // Service Multiplier
+        let serviceMultiplier = 1.0;
+        if (service === "Express") serviceMultiplier = 1.5;
+        if (service === "Priority") serviceMultiplier = 2.5;
+
+        const serviceCost = baseCost * (serviceMultiplier - 1.0);
+        const valueSurcharge = value * 0.015;
+        const total = baseCost * serviceMultiplier + valueSurcharge;
+
+        // Render breakdowns
+        liveVol.textContent = `${volume.toFixed(4)} m³`;
+        liveDim.textContent = `${dimWeight.toFixed(2)} kg`;
+        liveCharge.textContent = `${chargeableWeight.toFixed(2)} kg`;
+        liveBase.textContent = `NPR ${baseCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        liveService.textContent = `NPR ${serviceCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        liveVal.textContent = `NPR ${valueSurcharge.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        liveTotal.textContent = `NPR ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
+
+    // Bind event listeners to Django form fields
+    [fWeight, fLength, fWidth, fHeight, fValue, fService].forEach(el => {
+        if (el) {
+            el.addEventListener("input", calculateLiveFreight);
+            el.addEventListener("change", calculateLiveFreight);
+        }
+    });
+
+    // Run initial calculation
+    calculateLiveFreight();
+});
+</script>
+{% endblock %}

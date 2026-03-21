@@ -1,0 +1,177 @@
+{% extends "base/dashboard_base.html" %}
+{% block title %}Booking History | Smart Logistics ERP{% endblock %}
+{% block dashboard_content %}
+<div class="section-head no-print">
+    <div><span class="eyebrow">Customer records</span><h1>Booking History</h1></div>
+    <form method="get" class="command-bar compact">
+        <select name="status" class="form-select">
+            <option value="">All statuses</option>
+            {% for value,label in status_choices %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Filter</button>
+    </form>
+</div>
+
+<div class="erp-panel no-print">
+    <div class="table-responsive">
+        <table class="erp-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Cargo Type</th>
+                    <th>Weight & Volume</th>
+                    <th>Route Info</th>
+                    <th>Freight Cost</th>
+                    <th>Status</th>
+                    <th>Invoice / Track</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.created_at|date:"M d, Y" }}</td>
+                    <td><strong>{{ booking.cargo_type }}</strong><br><small class="text-muted">{{ booking.get_service_level_display }}</small></td>
+                    <td>
+                        <strong>{{ booking.weight }} kg</strong>
+                        <small class="text-muted">{{ booking.length }}x{{ booking.width }}x{{ booking.height }} cm</small>
+                    </td>
+                    <td>{{ booking.pickup_location }} → {{ booking.destination }}</td>
+                    <td class="fw-bold text-dark">NPR {{ booking.estimated_cost|floatformat:2 }}</td>
+                    <td>
+                        <span class="status-pill {% if booking.booking_status == 'Approved' %}status-transit{% endif %}">
+                            {{ booking.booking_status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            {% if booking.booking_status == 'Approved' %}
+                                <button class="btn btn-sm btn-outline-primary py-1 px-2" style="font-size: 0.76rem;" onclick="printInvoice('{{ booking.id }}', '{{ booking.created_at|date:'M d, Y' }}', '{{ booking.customer_name }}', '{{ booking.email }}', '{{ booking.phone_number }}', '{{ booking.cargo_type }}', '{{ booking.weight }}', '{{ booking.length }}', '{{ booking.width }}', '{{ booking.height }}', '{{ booking.get_service_level_display }}', '{{ booking.declared_value }}', '{{ booking.estimated_cost }}', '{% if booking.shipment %}{{ booking.shipment.tracking_id }}{% else %}PENDING{% endif %}', '{{ booking.pickup_location }}', '{{ booking.destination }}')">
+                                    <i class="bi bi-printer me-1"></i>Invoice
+                                </button>
+                                {% if booking.shipment %}
+                                    <a class="btn btn-sm btn-primary py-1 px-2" style="font-size: 0.76rem;" href="{% url 'track_shipment' %}?tracking_id={{ booking.shipment.tracking_id }}">
+                                        <i class="bi bi-search me-1"></i>Track
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted small">Awaiting review</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" class="empty-row text-center">No bookings found. Try creating a new shipment request!</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Print invoice container -->
+<div id="invoicePrintArea" class="printable-invoice d-none">
+    <!-- Dynamically populated via printInvoice JS function -->
+</div>
+
+<!-- Cost Invoice Calculation Print Script -->
+<script>
+function printInvoice(id, date, name, email, phone, cargo, weight, length, width, height, service, value, cost, tracking, pickup, destination) {
+    const printArea = document.getElementById("invoicePrintArea");
+    
+    // Programmatic cost details mapping
+    const volume = (parseFloat(length) * parseFloat(width) * parseFloat(height)) / 1000000;
+    const volWeight = (parseFloat(length) * parseFloat(width) * parseFloat(height)) / 5000;
+    const billableWeight = Math.max(parseFloat(weight), volWeight);
+    const baseCost = billableWeight * 1.50;
+    
+    let serviceMultiplier = 1.0;
+    if (service.includes("Express")) serviceMultiplier = 1.5;
+    if (service.includes("Priority")) serviceMultiplier = 2.5;
+
+    const serviceSurcharge = baseCost * (serviceMultiplier - 1.0);
+    const valueSurcharge = parseFloat(value) * 0.015;
+    
+    printArea.innerHTML = `
+        <div class="invoice-header">
+            <div>
+                <div class="invoice-logo"><i class="bi bi-truck-front text-primary me-2"></i>SmartLogix ERP</div>
+                <small class="text-muted">Central Logistics Terminal, Teku Gate 03, Kathmandu</small>
+            </div>
+            <div class="text-end">
+                <h2 class="fw-bold mb-0 text-dark">COMMERCIAL INVOICE</h2>
+                <small class="text-muted">Invoice Ref: INV-2026-${id}</small><br>
+                <small class="text-muted">Date: ${date}</small>
+            </div>
+        </div>
+        
+        <div class="invoice-grid">
+            <div class="invoice-section">
+                <span>Customer & Contact</span>
+                <strong>${name}</strong><br>
+                <small class="text-muted">${email} | ${phone}</small>
+            </div>
+            <div class="invoice-section">
+                <span>Freight Journey Route</span>
+                <strong>Origin Hub: ${pickup}</strong><br>
+                <strong>Destination Hub: ${destination}</strong>
+            </div>
+        </div>
+        
+        <div class="invoice-grid">
+            <div class="invoice-section">
+                <span>Logistics Parameters</span>
+                <strong>Service Level: ${service}</strong><br>
+                <strong>System Tracking ID: <span class="text-primary">${tracking}</span></strong>
+            </div>
+            <div class="invoice-section">
+                <span>Cargo Dimensions & Mass</span>
+                <strong>Actual Measured Mass: ${weight} kg</strong><br>
+                <strong>Packaging Volume: ${length} × ${width} × ${height} cm (${volume.toFixed(4)} m³)</strong>
+            </div>
+        </div>
+        
+        <h4 class="fw-bold mb-3 mt-4 text-dark"><i class="bi bi-receipt text-primary me-2"></i>Billing Statement Breakdown</h4>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Line-Item Description</th>
+                    <th>Specification details</th>
+                    <th class="text-end">Amount (NPR)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Base Weight Freight Fee</strong></td>
+                    <td>Based on max scale weight vs volumetric weight (${volWeight.toFixed(2)} kg) @ NPR 1.50/kg</td>
+                    <td class="text-end">NPR ${baseCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+                <tr>
+                    <td><strong>Freight Service Surcharge</strong></td>
+                    <td>Service multiplier tier (${service})</td>
+                    <td class="text-end">NPR ${serviceSurcharge.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+                <tr>
+                    <td><strong>Cargo Protection cover</strong></td>
+                    <td>1.5% declared cargo liability protection (Declared value: NPR ${parseFloat(value).toLocaleString()})</td>
+                    <td class="text-end">NPR ${valueSurcharge.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+                <tr style="border-top: 2px solid #0f172a; font-weight: 800; font-size: 1.15rem;">
+                    <td><strong>Grand Total</strong></td>
+                    <td>All taxes and regional highway terminal fees included</td>
+                    <td class="text-end text-primary">NPR ${parseFloat(cost).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="invoice-footer">
+            <span>Please print this invoice and present it at warehouse cargo bays for automatic gate release scans.</span>
+            <strong>SmartLogix ERP Operations Desk</strong>
+        </div>
+    `;
+    
+    // Temporarily unhide printable container for print window
+    printArea.classList.remove("d-none");
+    window.print();
+    printArea.classList.add("d-none");
+}
+</script>
+{% endblock %}

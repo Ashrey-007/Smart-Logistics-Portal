@@ -1,0 +1,117 @@
+{% extends "base/base.html" %}
+{% block title %}Track Cargo | Smart Logistics ERP{% endblock %}
+{% block content %}
+<section class="page-band">
+    <span class="eyebrow">Milestone Control Tower</span>
+    <h1>Cargo Tracking & Dispatch</h1>
+    <p>Monitor high-fidelity transit logs, carrier checkpoints, and estimated delivery schedules.</p>
+</section>
+
+<section class="container-fluid px-lg-4 py-5">
+    <!-- Tracking Input Bar -->
+    <div class="erp-panel mb-4">
+        <div class="panel-title"><h2>Enter Tracking ID</h2><span>Search single shipment</span></div>
+        <form method="get" class="command-bar tracking-search">
+            {{ form.tracking_id }}
+            <button class="btn btn-primary" type="submit"><i class="bi bi-radar me-1"></i>Track</button>
+        </form>
+    </div>
+    
+    {% if shipment %}
+    <div class="row g-4">
+        <!-- Timeline Column -->
+        <div class="col-lg-7">
+            <div class="erp-panel h-100">
+                <div class="panel-title mb-4">
+                    <h2>Chronological Transit Logs</h2>
+                    <span>Step-by-step history</span>
+                </div>
+                
+                {% if milestones %}
+                <div class="timeline-milestones">
+                    {% for milestone in milestones %}
+                        <div class="milestone-step {% if forloop.last %}active{% else %}completed{% endif %}">
+                            <div class="milestone-dot">
+                                {% if forloop.last %}
+                                    <i class="bi bi-record-circle-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-check-lg"></i>
+                                {% endif %}
+                            </div>
+                            <div class="milestone-content">
+                                <div class="milestone-meta">
+                                    <span class="text-primary"><i class="bi bi-geo-alt me-1"></i>{{ milestone.location }}</span>
+                                    <span>{{ milestone.timestamp|date:"M d, Y - H:i" }}</span>
+                                </div>
+                                <h4 class="mt-2">{{ milestone.get_status_display }}</h4>
+                                <p class="mb-0 text-muted">{{ milestone.description }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <div class="alert alert-info shadow-sm">
+                        <i class="bi bi-info-circle-fill me-2"></i>No detailed milestone history recorded yet. Check back shortly as the package is processed at the origin hub.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Package Specs Column -->
+        <div class="col-lg-5">
+            <!-- Tracking Brief Card -->
+            <div class="kpi-card mb-4 bg-primary text-white border-0 shadow-lg position-relative" style="min-height: auto; padding: 24px;">
+                <span class="text-white text-opacity-75 small">Active Tracking ID</span>
+                <h2 class="fw-bold mb-1 mt-1 text-white">{{ shipment.tracking_id }}</h2>
+                <div class="d-flex align-items-center gap-2 mt-3">
+                    <span class="badge bg-white text-primary rounded-pill px-3 py-2 fw-bold">{{ shipment.get_status_display }}</span>
+                    <small class="text-white text-opacity-80">Estimated Delivery: {{ shipment.estimated_delivery_date }}</small>
+                </div>
+                <i class="bi bi-truck position-absolute end-0 bottom-0 text-white text-opacity-10 display-3 pe-3 pb-2" style="font-size: 5rem;"></i>
+            </div>
+            
+            <!-- Volumetric & Freight Specifications -->
+            <div class="erp-panel">
+                <div class="panel-title mb-3">
+                    <h2>Cargo Specifications</h2>
+                    <span>Volumetric parameters</span>
+                </div>
+                
+                <div class="list-group list-group-flush bg-transparent">
+                    <div class="list-group-item bg-transparent px-0 border-line py-3 d-flex justify-content-between">
+                        <div><strong>Origin Terminal</strong><br><small class="text-muted">Dispatch hub</small></div>
+                        <span class="fw-bold text-dark">{{ shipment.booking.pickup_location }}</span>
+                    </div>
+                    <div class="list-group-item bg-transparent px-0 border-line py-3 d-flex justify-content-between">
+                        <div><strong>Destination Terminal</strong><br><small class="text-muted">Delivery point</small></div>
+                        <span class="fw-bold text-dark">{{ shipment.booking.destination }}</span>
+                    </div>
+                    <div class="list-group-item bg-transparent px-0 border-line py-3 d-flex justify-content-between">
+                        <div><strong>Freight Service Level</strong><br><small class="text-muted">Delivery speed class</small></div>
+                        <span class="badge bg-secondary px-3 py-2">{{ shipment.booking.get_service_level_display }}</span>
+                    </div>
+                    <div class="list-group-item bg-transparent px-0 border-line py-3 d-flex justify-content-between">
+                        <div><strong>Actual Measured Weight</strong><br><small class="text-muted">Scale weight</small></div>
+                        <span class="fw-bold text-dark">{{ shipment.booking.weight }} kg</span>
+                    </div>
+                    <div class="list-group-item bg-transparent px-0 border-line py-3 d-flex justify-content-between">
+                        <div><strong>Cargo Dimensions</strong><br><small class="text-muted">L x W x H in cm</small></div>
+                        <span class="fw-bold text-dark">{{ shipment.booking.length }} × {{ shipment.booking.width }} × {{ shipment.booking.height }} cm</span>
+                    </div>
+                    <div class="list-group-item bg-transparent px-0 border-line py-3 d-flex justify-content-between">
+                        <div><strong>Declared Freight Value</strong><br><small class="text-muted">Customs declaration</small></div>
+                        <span class="fw-bold text-dark">NPR {{ shipment.booking.declared_value|floatformat:2 }}</span>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light border mt-3 mb-0 text-center">
+                    <span class="text-muted small">All logistics synchronized live via Teku Control Tower.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif searched %}
+    <div class="alert alert-warning shadow-sm mt-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>No active shipment record was found for that tracking ID. Please verify spelling (e.g. SL-XXXXXXXXXX) and try again.</div>
+    {% endif %}
+</section>
+{% endblock %}

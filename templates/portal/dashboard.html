@@ -1,0 +1,46 @@
+{% extends "base/dashboard_base.html" %}
+{% block title %}Dashboard | Smart Logistics{% endblock %}
+{% block dashboard_content %}
+<div class="section-head">
+    <div><span class="eyebrow">Customer command center</span><h1>Shipment Workspace</h1></div>
+    <a class="btn btn-primary" href="{% url 'create_booking' %}"><i class="bi bi-plus-lg"></i> New Booking</a>
+</div>
+<div class="kpi-grid">
+    <div class="kpi-card"><span>Bookings</span><strong>{{ booking_count }}</strong><i class="bi bi-clipboard-check"></i></div>
+    <div class="kpi-card"><span>Active Shipments</span><strong>{{ shipment_count }}</strong><i class="bi bi-truck"></i></div>
+    <div class="kpi-card"><span>Support Cases</span><strong>{{ complaint_count }}</strong><i class="bi bi-chat-square-text"></i></div>
+</div>
+<div class="grid-2">
+    <div class="erp-panel">
+        <div class="panel-title"><h2>Shipment Pipeline</h2><span>Latest 6</span></div>
+        <div class="table-responsive">
+            <table class="erp-table">
+                <thead><tr><th>Tracking</th><th>Route</th><th>Status</th><th>Progress</th><th>ETA</th></tr></thead>
+                <tbody>
+                {% for shipment in latest_shipments %}
+                    <tr>
+                        <td><strong>{{ shipment.tracking_id }}</strong></td>
+                        <td>{{ shipment.booking.pickup_location }} -> {{ shipment.booking.destination }}</td>
+                        <td><span class="status-pill status-transit">{{ shipment.status }}</span></td>
+                        <td><div class="mini-progress"><span style="width: {{ shipment.progress_percent }}%"></span></div></td>
+                        <td>{{ shipment.estimated_delivery_date }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="empty-row">No shipments yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="erp-panel">
+        <div class="panel-title"><h2>Recent Bookings</h2><a href="{% url 'booking_history' %}">View all</a></div>
+        <div class="timeline-list">
+            {% for booking in recent_bookings %}
+                <div class="timeline-item"><span></span><div><strong>{{ booking.cargo_type }}</strong><small>{{ booking.pickup_location }} to {{ booking.destination }}</small></div><em>{{ booking.booking_status }}</em></div>
+            {% empty %}
+                <p class="empty-row">No bookings submitted.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

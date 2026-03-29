@@ -1,0 +1,102 @@
+{% extends "base/dashboard_base.html" %}
+{% block title %}Admin Dashboard | Smart Logistics{% endblock %}
+{% block dashboard_content %}
+<div class="section-head">
+    <div><span class="eyebrow">ERP control tower</span><h1>Operations Dashboard</h1></div>
+    <form method="get" class="command-bar">
+        <input class="form-control" name="q" value="{{ search }}" placeholder="Search customer or tracking">
+        <select class="form-select" name="booking_status">
+            <option value="">Booking status</option>
+            {% for value,label in booking_status_choices %}<option value="{{ value }}" {% if booking_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <select class="form-select" name="shipment_status">
+            <option value="">Shipment status</option>
+            {% for value,label in shipment_status_choices %}<option value="{{ value }}" {% if shipment_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i></button>
+    </form>
+</div>
+<div class="row g-3 mb-4 no-print">
+    <div class="col-lg-4 col-12">
+        <div class="kpi-card bg-primary text-white border-0 shadow-sm" style="min-height: 126px;">
+            <span class="text-white text-opacity-75">Estimated Total Revenue</span>
+            <strong class="text-white mt-2 d-block">NPR {{ total_revenue|floatformat:2 }}</strong>
+            <i class="bi bi-wallet2 text-white text-opacity-10" style="font-size: 3.5rem;"></i>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="kpi-card"><span>Total Bookings</span><strong>{{ total_bookings }}</strong><i class="bi bi-inboxes"></i></div>
+    </div>
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="kpi-card"><span>Active Shipments</span><strong>{{ total_shipments }}</strong><i class="bi bi-truck-front"></i></div>
+    </div>
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="kpi-card"><span>Support Cases</span><strong>{{ total_complaints }}</strong><i class="bi bi-exclamation-diamond"></i></div>
+    </div>
+    <div class="col-lg-2 col-md-3 col-6">
+        <div class="kpi-card"><span>Total Customers</span><strong>{{ total_customers }}</strong><i class="bi bi-people"></i></div>
+    </div>
+</div>
+<div class="grid-2 no-print">
+    <div class="erp-panel">
+        <div class="panel-title"><h2>Shipment Status Analytics</h2><span>Live summary</span></div>
+        <div style="position: relative; height: 200px; width: 100%;">
+            <canvas id="shipmentChart"></canvas>
+        </div>
+    </div>
+    <div class="erp-panel">
+        <div class="panel-title"><h2>Exception Queue</h2><span>Action required</span></div>
+        <div class="exception-card"><strong>{{ pending_bookings }}</strong><span>Pending booking approvals</span></div>
+        <div class="exception-card warn"><strong>{{ open_complaints }}</strong><span>Open customer complaints</span></div>
+    </div>
+</div>
+<div class="erp-panel">
+    <div class="panel-title"><h2>Booking Requests</h2><span>Approve or reject requests</span></div>
+    <div class="table-responsive">
+        <table class="erp-table">
+            <thead><tr><th>Customer</th><th>Cargo</th><th>Route</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            {% for booking in bookings %}
+                <tr><td><strong>{{ booking.customer_name }}</strong><small>{{ booking.email }}</small></td><td>{{ booking.cargo_type }}</td><td>{{ booking.pickup_location }} -> {{ booking.destination }}</td><td><span class="status-pill">{{ booking.booking_status }}</span></td><td><a class="btn btn-sm btn-outline-primary" href="{% url 'admin_booking_detail' booking.id %}">Review</a></td></tr>
+            {% empty %}
+                <tr><td colspan="5" class="empty-row">No bookings found.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="grid-2">
+    <div class="erp-panel">
+        <div class="panel-title"><h2>Shipment Board</h2><span>Latest movements</span></div>
+        <div class="table-responsive">
+            <table class="erp-table">
+                <thead><tr><th>Tracking</th><th>Status</th><th>ETA</th><th></th></tr></thead>
+                <tbody>
+                {% for shipment in shipments %}
+                    <tr><td><strong>{{ shipment.tracking_id }}</strong><small>{{ shipment.current_location|default:"Location pending" }}</small></td><td><span class="status-pill status-transit">{{ shipment.status }}</span></td><td>{{ shipment.estimated_delivery_date }}</td><td><a class="btn btn-sm btn-outline-primary" href="{% url 'admin_shipment_update' shipment.id %}">Update</a></td></tr>
+                {% empty %}
+                    <tr><td colspan="4" class="empty-row">No shipments found.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="erp-panel">
+        <div class="panel-title"><h2>Support Cases</h2><span>Customer complaints</span></div>
+        <div class="table-responsive">
+            <table class="erp-table">
+                <thead><tr><th>Tracking</th><th>Type</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                {% for complaint in complaints %}
+                    <tr><td><strong>{{ complaint.tracking_id }}</strong></td><td>{{ complaint.complaint_type }}</td><td><span class="status-pill">{{ complaint.complaint_status }}</span></td><td><a class="btn btn-sm btn-outline-primary" href="{% url 'admin_complaint_reply' complaint.id %}">Reply</a></td></tr>
+                {% empty %}
+                    <tr><td colspan="4" class="empty-row">No complaints found.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{ chart_labels|json_script:"chart-labels" }}
+{{ chart_values|json_script:"chart-values" }}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base/dashboard_base.html" %}
+{% block title %}Review Booking #{{ booking.id }} | Smart Logistics ERP{% endblock %}
+{% block dashboard_content %}
+<div class="section-head"><div><span class="eyebrow">Approval workflow</span><h1>Review Booking #{{ booking.id }}</h1></div></div>
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="erp-panel h-100">
+            <div class="panel-title mb-3"><h2>Cargo & Customer Details</h2><span>Full booking record</span></div>
+            <div class="record-grid">
+                <div><span>Customer</span><strong>{{ booking.customer_name }}</strong></div>
+                <div><span>Contact Number</span><strong>{{ booking.phone_number }}</strong></div>
+                <div><span>Email Address</span><strong>{{ booking.email }}</strong></div>
+                <div><span>Cargo Type</span><strong>{{ booking.cargo_type }}</strong></div>
+                <div><span>Actual Weight</span><strong>{{ booking.weight }} kg</strong></div>
+                <div><span>Package Dimensions</span><strong>{{ booking.length }}×{{ booking.width }}×{{ booking.height }} cm</strong></div>
+                <div><span>Service Level</span><strong>{{ booking.get_service_level_display }}</strong></div>
+                <div><span>Declared Value</span><strong>NPR {{ booking.declared_value|floatformat:2 }}</strong></div>
+                <div><span>Route</span><strong>{{ booking.pickup_location }} → {{ booking.destination }}</strong></div>
+                <div><span>Pickup Date</span><strong>{{ booking.pickup_date }}</strong></div>
+            </div>
+            {% if booking.additional_notes %}
+            <div class="note-box mt-3">
+                <span class="d-block text-muted small fw-bold text-uppercase mb-1">Additional Notes</span>
+                {{ booking.additional_notes }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="calculator-card shadow-sm mb-4">
+            <h4 class="fw-bold mb-3"><i class="bi bi-receipt text-primary me-2"></i>Freight Quote</h4>
+            <div class="calc-metric"><span>Estimated Cost</span><strong>NPR {{ booking.estimated_cost|floatformat:2 }}</strong></div>
+            <div class="calc-metric"><span>Current Status</span><strong>
+                <span class="status-pill {% if booking.booking_status == 'Approved' %}status-transit{% endif %}">{{ booking.booking_status }}</span>
+            </strong></div>
+        </div>
+        <div class="erp-panel">
+            <div class="panel-title mb-3"><h2>Decision</h2><span>Approve or reject</span></div>
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="col-12">
+                    <label class="form-label fw-semibold small text-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endfor %}
+                <div class="col-12"><button class="btn btn-primary w-100 fw-bold" type="submit"><i class="bi bi-check2-circle me-2"></i>Save Decision</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base/dashboard_base.html" %}
+{% block title %}Update Shipment {{ shipment.tracking_number }} | Smart Logistics ERP{% endblock %}
+{% block dashboard_content %}
+<div class="section-head">
+    <div>
+        <span class="eyebrow">Milestone Control Tower</span>
+        <h1>Update Shipment #{{ shipment.id }}</h1>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="erp-panel h-100">
+            <div class="panel-title mb-3">
+                <h2>Shipment & Booking Record</h2>
+                <span>Detailed cargo specs</span>
+            </div>
+            
+            <div class="record-grid mb-4">
+                <div><span>Tracking ID</span><strong class="text-primary font-monospace">{{ shipment.tracking_number }}</strong></div>
+                <div><span>Origin</span><strong>{{ shipment.booking.pickup_location }}</strong></div>
+                <div><span>Destination</span><strong>{{ shipment.booking.destination }}</strong></div>
+                <div><span>Estimated Delivery</span><strong>{{ shipment.estimated_delivery|default:"TBD" }}</strong></div>
+                <div><span>Status</span><strong><span class="status-pill status-transit">{{ shipment.get_status_display }}</span></strong></div>
+                <div><span>Service Level</span><strong>{{ shipment.booking.get_service_level_display }}</strong></div>
+                <div><span>Weight</span><strong>{{ shipment.booking.weight }} kg</strong></div>
+                <div><span>Declared Value</span><strong>NPR {{ shipment.booking.declared_value|floatformat:2 }}</strong></div>
+            </div>
+
+            <div class="panel-title mb-2">
+                <h2>Milestone Log History</h2>
+                <span>Latest recorded events</span>
+            </div>
+            <div class="tracking-history bg-light p-3 rounded border" style="max-height: 250px; overflow-y: auto;">
+                {% if milestones %}
+                    <ul class="list-unstyled mb-0">
+                        {% for milestone in milestones %}
+                        <li class="mb-2 pb-2 border-bottom last-border-0">
+                            <div class="d-flex justify-content-between small">
+                                <span class="fw-bold text-dark">{{ milestone.get_status_display }}</span>
+                                <span class="text-muted">{{ milestone.timestamp|date:"Y-m-d H:i" }}</span>
+                            </div>
+                            {% if milestone.transit_note %}
+                            <div class="text-muted small mt-1 italic">“{{ milestone.transit_note }}”</div>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted small mb-0">No transit logs generated yet. Approval registered booking creation.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="erp-panel h-100">
+            <div class="panel-title mb-3">
+                <h2>Update Transit Milestone</h2>
+                <span>Enter new status details</span>
+            </div>
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="col-12">
+                        <label class="form-label fw-semibold small text-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="col-12 mt-4">
+                    <button class="btn btn-primary w-100 fw-bold btn-lg" type="submit">
+                        <i class="bi bi-arrow-repeat me-2"></i>Update Milestone
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
